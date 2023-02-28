@@ -19,8 +19,33 @@ export class VideoCallComponent implements OnInit {
   connection?: RTCPeerConnection
   peerList: string[] = []
 
+  muted = false;
+  showWebcam = true;
+
+  audioConstraints : MediaTrackConstraints= {
+    echoCancellation: true,
+    noiseSuppression: true,
+    latency: 0.003
+  }
+
   constructor() { 
     this.peer = new Peer();
+  }
+
+  toggleMic(){
+    if(this.muted){
+      this.lazyStream!.getAudioTracks()[0].enabled = true;
+      this.muted = false
+    }
+    else{
+      this.lazyStream!.getAudioTracks()[0].enabled = false;
+      this.muted = true
+    }
+  }
+
+  toggleCam(){
+    this.showWebcam = !this.showWebcam
+    this.lazyStream!.getVideoTracks()[0].enabled = this.showWebcam
   }
 
   ngOnInit(): void {
@@ -29,12 +54,14 @@ export class VideoCallComponent implements OnInit {
       })
   
       this.peer.on("call", (call) =>{
+        console.log("call ricevuta")
+
         navigator.mediaDevices.getUserMedia({
           video: true,
-          audio: true
+          audio: this.audioConstraints
         }).then((stream) =>{
           this.lazyStream = stream
-  
+
           call.answer(stream);
           call.on("stream", (remoteStream) =>{
             if(!this.peerList.includes(call.peer)){
@@ -54,12 +81,14 @@ export class VideoCallComponent implements OnInit {
     if(this.peerToCall != ""){
       navigator.mediaDevices.getUserMedia({
         video: true,
-        audio: true
+        audio: this.audioConstraints
       }).then((stream) =>{
         this.lazyStream = stream;
 
+        console.log("call partita")
         const call = this.peer.call(this.peerToCall, stream);
         call.on("stream", (remoteStream)=>{
+          console.log("connectWithPeer.stream event")
           this.streamRemoteVideo(remoteStream);
           this.connection = call.peerConnection;
           this.peerList.push(call.peer);
