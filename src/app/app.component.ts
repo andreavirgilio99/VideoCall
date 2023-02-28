@@ -6,5 +6,13 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
+  username = '';
   title = 'TFW';
+
+  setUsername(){
+    let input = (<HTMLInputElement>document.getElementById("username"))
+    if(input.value != ""){
+      this.username = input.value
+    }
+  }
 }
