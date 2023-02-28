@@ -22,87 +22,89 @@ export class VideoCallComponent implements OnInit {
   muted = false;
   showWebcam = true;
 
-  audioConstraints : MediaTrackConstraints= {
+  audioConstraints: MediaTrackConstraints = {
     echoCancellation: true,
     noiseSuppression: true,
     latency: 0.003
   }
 
-  constructor() { 
+  constructor() {
     this.peer = new Peer();
   }
 
-  toggleMic(){
-    if(this.muted){
+  toggleMic() {
+    if (this.muted) {
       this.lazyStream!.getAudioTracks()[0].enabled = true;
       this.muted = false
     }
-    else{
+    else {
       this.lazyStream!.getAudioTracks()[0].enabled = false;
       this.muted = true
     }
   }
 
-  toggleCam(){
+  toggleCam() {
     this.showWebcam = !this.showWebcam
     this.lazyStream!.getVideoTracks()[0].enabled = this.showWebcam
   }
 
   ngOnInit(): void {
-    this.peer.on("open", (id) =>{
+    this.peer.on("open", (id) => {
       this.peerId = id;
-      })
-  
-      this.peer.on("call", (call) =>{
-        console.log("call ricevuta")
+    })
 
-        navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: this.audioConstraints
-        }).then((stream) =>{
-          this.lazyStream = stream
+    this.peer.on("call", (call) => {
+      console.log("call ricevuta")
 
-          call.answer(stream);
-          call.on("stream", (remoteStream) =>{
-            if(!this.peerList.includes(call.peer)){
-              console.log("call.peer: " + call.peer)
-              this.streamRemoteVideo(remoteStream)
-              this.connection = call.peerConnection;
-              this.peerList.push(call.peer);
-            }
-          })
-        }).catch(err =>{
-          console.error(err)
-        })
-      })
-  }
-
-  connectWithPeer(){
-    if(this.peerToCall != ""){
       navigator.mediaDevices.getUserMedia({
         video: true,
         audio: this.audioConstraints
-      }).then((stream) =>{
+      }).then((stream) => {
+        this.lazyStream = stream
+
+        call.answer(stream);
+        call.on("stream", (remoteStream) => {
+          if (!this.peerList.includes(call.peer)) {
+            console.log("call.peer: " + call.peer)
+            this.streamRemoteVideo(remoteStream)
+            this.connection = call.peerConnection;
+            this.peerList.push(call.peer);
+          }
+        })
+      }).catch(err => {
+        console.error(err)
+      })
+    })
+  }
+
+  connectWithPeer() {
+    if (this.peerToCall != "") {
+      navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: this.audioConstraints
+      }).then((stream) => {
         this.lazyStream = stream;
 
         console.log("call partita")
         const call = this.peer.call(this.peerToCall, stream);
-        call.on("stream", (remoteStream)=>{
+        call.on("stream", (remoteStream) => {
+          if (this.peerList.includes(call.peer))
+            return
           console.log("connectWithPeer.stream event")
           this.streamRemoteVideo(remoteStream);
           this.connection = call.peerConnection;
           this.peerList.push(call.peer);
         })
-      }).catch(err =>{
+      }).catch(err => {
         console.error(err)
       })
     }
-    else{
+    else {
       alert("peer input is empty")
     }
   }
 
-  streamRemoteVideo(stream: MediaStream){
+  streamRemoteVideo(stream: MediaStream) {
     const video = document.createElement("video");
     video.classList.add("video");
     video.srcObject = stream;
@@ -110,28 +112,28 @@ export class VideoCallComponent implements OnInit {
     document.getElementById("remote-video")?.append(video)
   }
 
-  screenShare(){
+  screenShare() {
     navigator.mediaDevices.getDisplayMedia({
       video: true,
       audio: {
         echoCancellation: true,
         noiseSuppression: true
       }
-    }).then((stream) =>{
+    }).then((stream) => {
       const videoTrack = stream.getVideoTracks()[0];
-      videoTrack.onended = () =>{
+      videoTrack.onended = () => {
         this.stopScreenShare()
       }
 
       const sender = this.connection?.getSenders()
         .find(s => s.track?.kind === videoTrack.kind)!
       sender.replaceTrack(videoTrack)
-    }).catch(err=>{
+    }).catch(err => {
       console.error(err)
     })
   }
 
-  stopScreenShare(){
+  stopScreenShare() {
     const videoTrack = this.lazyStream?.getVideoTracks()[0]!
     const sender = this.connection?.getSenders()
       .find(s => s.track?.kind === videoTrack.kind);
