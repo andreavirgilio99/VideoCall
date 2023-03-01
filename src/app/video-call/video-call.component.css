@@ -1,0 +1,12 @@
+div#remote-video {
+    border: 2px solid black;
+    position: relative;
+    width: 50vw;
+    margin: 0 auto;
+}
+
+div#local-video {
+    display: block;
+    width: 15vw;
+    position: absolute;
+}
