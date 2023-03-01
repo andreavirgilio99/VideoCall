@@ -97,10 +97,12 @@ export class VideoCallComponent implements OnInit {
         console.log("call partita")
         const call = this.peer.call(this.peerToCall, stream);
         call.on("stream", (remoteStream) => {
-          console.log("connectWithPeer.stream event")
-          this.streamRemoteVideo(remoteStream);
-          this.connection = call.peerConnection;
-          this.peerList.push(call.peer);
+          if (!this.peerList.includes(call.peer)) {
+            console.log("connectWithPeer.stream event")
+            this.streamRemoteVideo(remoteStream);
+            this.connection = call.peerConnection;
+            this.peerList.push(call.peer);
+          }
         })
       }).catch(err => {
         console.error(err)
