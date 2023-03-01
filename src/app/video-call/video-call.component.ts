@@ -144,7 +144,9 @@ export class VideoCallComponent implements OnInit {
     let localCamContainer = document.getElementById("local-video");
 
     remoteCamContainer?.childNodes.forEach(node => {
-      node.remove();
+      if(!node.hasChildNodes()){
+        node.remove();
+      }
     })
 
     localCamContainer?.childNodes.forEach(node => {
@@ -158,8 +160,8 @@ export class VideoCallComponent implements OnInit {
     const video = document.createElement("video");
     video.classList.add("video");
     video.srcObject = stream;
-    video.style.height = "inherit";
-    video.style.width = "inherit"
+    video.style.height = "100%";
+    video.style.width = "100%"
 
 
     if (isLocal) {
