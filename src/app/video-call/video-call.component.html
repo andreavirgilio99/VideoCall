@@ -26,7 +26,7 @@
       <br>
       <div style="margin-top: 20px;">
         <input type="text" placeholder="Peer Id" [(ngModel)]='peerToCall'/>
-        <button class="button" (click)="connectWithPeer()">Call Peer</button>
+        <button *ngIf="!lazyStream" class="button" (click)="connectWithPeer()">Call Peer</button>
         <ng-container *ngIf="lazyStream">
           <button *ngIf="!isSharingScreen" class="button" id="screenShare" (click)="screenShare()">Screen share</button>
           <button *ngIf="isSharingScreen" class="button" id="screenShare" (click)="stopScreenShare()">Stop screen share</button>
