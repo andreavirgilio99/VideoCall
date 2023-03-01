@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import Peer from 'peerjs';
 
 @Component({
@@ -30,7 +30,7 @@ export class VideoCallComponent implements OnInit {
     latency: 0.003
   }
 
-  constructor() {
+  constructor(private detector: ChangeDetectorRef) {
     this.peer = new Peer();
   }
 
@@ -63,6 +63,7 @@ export class VideoCallComponent implements OnInit {
         audio: this.audioConstraints
       }).then((stream) => {
         this.lazyStream = stream
+        this.detector.detectChanges()
 
         call.answer(stream);
         call.on("stream", (remoteStream) => {
@@ -100,6 +101,7 @@ export class VideoCallComponent implements OnInit {
         audio: this.audioConstraints
       }).then((stream) => {
         this.lazyStream = stream;
+        this.detector.detectChanges()
 
         console.log("call partita")
         const call = this.peer.call(this.peerToCall, stream);
@@ -135,6 +137,7 @@ export class VideoCallComponent implements OnInit {
   closeCall() {
     this.lazyStream!.getTracks().forEach(track => track.stop())
     this.lazyStream = undefined;
+    this.detector.detectChanges()
     this.peerList = [];
     this.peerToCall = "";
 

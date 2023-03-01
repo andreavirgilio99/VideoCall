@@ -3,8 +3,8 @@
   <div class="row">
     <div class="col-md-6" *ngIf="lazyStream">
       <h5>List of Users:</h5>
-      <span *ngFor="let peer of peerList" ngIf="peerList.length > 0">
-        {{peer}}
+      <span *ngIf="peerList.length > 0">
+        <span *ngFor="let peer of peerList">{{peer}}</span>
       </span>
       <div>
         <mat-icon *ngIf="!muted" (click)="toggleMic()">mic</mat-icon>
@@ -27,8 +27,10 @@
       <div style="margin-top: 20px;">
         <input type="text" placeholder="Peer Id" [(ngModel)]='peerToCall'/>
         <button class="button" (click)="connectWithPeer()">Call Peer</button>
-        <button *ngIf="!isSharingScreen" class="button" id="screenShare" (click)="screenShare()">Screen share</button>
-        <button *ngIf="isSharingScreen" class="button" id="screenShare" (click)="stopScreenShare()">Stop screen share</button>
+        <ng-container *ngIf="lazyStream">
+          <button *ngIf="!isSharingScreen" class="button" id="screenShare" (click)="screenShare()">Screen share</button>
+          <button *ngIf="isSharingScreen" class="button" id="screenShare" (click)="stopScreenShare()">Stop screen share</button>
+        </ng-container>
       </div>
     </div>
   </div>
