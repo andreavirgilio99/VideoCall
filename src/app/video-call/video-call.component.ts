@@ -75,7 +75,13 @@ export class VideoCallComponent implements OnInit {
         call.on("stream", (remoteStream) => {
           if (!this.peerList.includes(call.peer)) {
             console.log("call.peer: " + call.peer)
-            this.streamRemoteVideo(remoteStream)
+
+            //remote stream
+            this.streamVideo(remoteStream, false)
+
+            //my stream
+            this.streamVideo(this.lazyStream!, true)
+
             this.connection = call.peerConnection;
             this.peerList.push(call.peer);
           }
@@ -99,7 +105,13 @@ export class VideoCallComponent implements OnInit {
         call.on("stream", (remoteStream) => {
           if (!this.peerList.includes(call.peer)) {
             console.log("connectWithPeer.stream event")
-            this.streamRemoteVideo(remoteStream);
+
+            //local stream
+            this.streamVideo(this.lazyStream!, true)
+
+            //remote stream
+            this.streamVideo(remoteStream, false);
+
             this.connection = call.peerConnection;
             this.peerList.push(call.peer);
           }
@@ -113,12 +125,19 @@ export class VideoCallComponent implements OnInit {
     }
   }
 
-  streamRemoteVideo(stream: MediaStream) {
+  streamVideo(stream: MediaStream, isLocal: boolean) {
+    let id = "remote-video";
     const video = document.createElement("video");
     video.classList.add("video");
     video.srcObject = stream;
+
+    if(isLocal){
+      id = "local-video";
+      video.muted = true;
+    }
+
     video.play();
-    document.getElementById("remote-video")?.append(video)
+    document.getElementById(id)?.append(video)
   }
 
   screenShare() {
