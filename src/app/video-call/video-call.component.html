@@ -9,8 +9,10 @@
       <div>
         <mat-icon *ngIf="!muted" (click)="toggleMic()">mic</mat-icon>
         <mat-icon *ngIf="muted" (click)="toggleMic()">mic_off</mat-icon>
+
         <mat-icon *ngIf="showWebcam" (click)="toggleCam()">videocam</mat-icon>
         <mat-icon *ngIf="!showWebcam" (click)="toggleCam()">videocam_off</mat-icon>
+        
         <mat-icon (click)="closeCall()"> call_end</mat-icon>
       </div>
     </div>
@@ -23,7 +25,8 @@
       <div style="margin-top: 20px;">
         <input type="text" placeholder="Peer Id" [(ngModel)]='peerToCall'/>
         <button class="button" (click)="connectWithPeer()">Call Peer</button>
-        <button class="button" id="screenShare" (click)="screenShare()">Screen share</button>
+        <button *ngIf="!isSharingScreen" class="button" id="screenShare" (click)="screenShare()">Screen share</button>
+        <button *ngIf="isSharingScreen" class="button" id="screenShare" (click)="stopScreenShare()">Stop screen share</button>
       </div>
     </div>
   </div>

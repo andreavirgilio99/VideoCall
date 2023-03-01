@@ -17,20 +17,13 @@ export class VideoCallComponent implements OnInit {
 
   lazyStream?: MediaStream
   connection?: RTCPeerConnection
+  messageChannel?: RTCDataChannel
   peerList: string[] = []
 
   muted = false;
   showWebcam = true;
-
-  //suggerite da chatGpt
-  /*audioConstraints : MediaTrackConstraints= {
-    echoCancellation: true,
-    noiseSuppression: true,
-    autoGainControl: true,
-    sampleRate: 48000 ,
-    channelCount: 2
-  }
-  */
+  isSharingScreen = false;
+  
   audioConstraints: MediaTrackConstraints = {
     echoCancellation: true,
     noiseSuppression: true,
@@ -73,6 +66,7 @@ export class VideoCallComponent implements OnInit {
 
         call.answer(stream);
         call.on("stream", (remoteStream) => {
+   
           if (!this.peerList.includes(call.peer)) {
             console.log("call.peer: " + call.peer)
 
@@ -83,19 +77,19 @@ export class VideoCallComponent implements OnInit {
             this.streamVideo(this.lazyStream!, true)
 
             this.connection = call.peerConnection;
-            this.connection?.addEventListener('connectionstatechange', () => alert("state change: " + this.connection?.connectionState))
-            this.connection.oniceconnectionstatechange = (state) =>{alert(JSON.stringify(state))}
+
+            this.connection.oniceconnectionstatechange = () => {
+              if(this.connection?.iceConnectionState == "disconnected"){
+                this.closeCall();
+              }
+            }
+
             this.peerList.push(call.peer);
           }
         })
       }).catch(err => {
         console.error(err)
       })
-    })
-
-    this.peer.on('disconnected', () =>{
-      alert("disconnected")
-      this.closeCall();
     })
   }
 
@@ -120,8 +114,12 @@ export class VideoCallComponent implements OnInit {
             this.streamVideo(remoteStream, false);
 
             this.connection = call.peerConnection;
-            this.connection?.addEventListener('connectionstatechange', () => alert("state change: " + this.connection?.connectionState))
-            this.connection.oniceconnectionstatechange = (state) =>{alert(JSON.stringify(state))}
+
+            this.connection.oniceconnectionstatechange = () => {
+              if(this.connection?.iceConnectionState == "disconnected"){
+                this.closeCall();
+              }
+            }
             this.peerList.push(call.peer);
           }
         })
@@ -134,21 +132,22 @@ export class VideoCallComponent implements OnInit {
     }
   }
 
-  closeCall(){
+  closeCall() {
     this.lazyStream!.getTracks().forEach(track => track.stop())
     this.lazyStream = undefined;
     this.peerList = [];
     this.peerToCall = "";
+
     this.connection?.close()
-    
+
     let remoteCamContainer = document.getElementById("remote-video");
     let localCamContainer = document.getElementById("local-video");
-    
-    remoteCamContainer?.childNodes.forEach(node =>{
+
+    remoteCamContainer?.childNodes.forEach(node => {
       node.remove();
     })
 
-    localCamContainer?.childNodes.forEach(node =>{
+    localCamContainer?.childNodes.forEach(node => {
       node.remove();
     })
     localCamContainer!.style.display = "none"
@@ -159,8 +158,11 @@ export class VideoCallComponent implements OnInit {
     const video = document.createElement("video");
     video.classList.add("video");
     video.srcObject = stream;
+    video.style.height = "inherit";
+    video.style.width = "inherit"
 
-    if(isLocal){
+
+    if (isLocal) {
       id = "local-video";
       video.muted = true;
       document.getElementById(id)!.style.display = "unset"
@@ -186,6 +188,7 @@ export class VideoCallComponent implements OnInit {
       const sender = this.connection?.getSenders()
         .find(s => s.track?.kind === videoTrack.kind)!
       sender.replaceTrack(videoTrack)
+      this.isSharingScreen = true
     }).catch(err => {
       console.error(err)
     })
@@ -196,5 +199,6 @@ export class VideoCallComponent implements OnInit {
     const sender = this.connection?.getSenders()
       .find(s => s.track?.kind === videoTrack.kind);
     sender?.replaceTrack(videoTrack);
+    this.isSharingScreen = false;
   }
 }
