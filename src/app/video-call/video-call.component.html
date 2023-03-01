@@ -11,13 +11,14 @@
         <mat-icon *ngIf="muted" (click)="toggleMic()">mic_off</mat-icon>
         <mat-icon *ngIf="showWebcam" (click)="toggleCam()">videocam</mat-icon>
         <mat-icon *ngIf="!showWebcam" (click)="toggleCam()">videocam_off</mat-icon>
+        <mat-icon (click)="closeCall()"> call_end</mat-icon>
       </div>
     </div>
     <div class="col-md-6">
       <!-- Video & screen share container -->
       <span>PeerId: {{peerId}}</span>
       <div style="width: 400px; height: 300px; border: 2px solid; margin: 0 auto;" id="remote-video"></div>
-      <div style="width: 400px; height: 300px; border: 2px solid; margin: 0 auto;" id="local-video"></div>
+      <div style="width: 400px; height: 300px; border: 2px solid; margin: 0 auto; display: none;" id="local-video"></div>
       <br>
       <div style="margin-top: 20px;">
         <input type="text" placeholder="Peer Id" [(ngModel)]='peerToCall'/>

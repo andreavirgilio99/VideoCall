@@ -83,12 +83,19 @@ export class VideoCallComponent implements OnInit {
             this.streamVideo(this.lazyStream!, true)
 
             this.connection = call.peerConnection;
+            this.connection?.addEventListener('connectionstatechange', () => alert("state change: " + this.connection?.connectionState))
+            this.connection.oniceconnectionstatechange = (state) =>{alert(JSON.stringify(state))}
             this.peerList.push(call.peer);
           }
         })
       }).catch(err => {
         console.error(err)
       })
+    })
+
+    this.peer.on('disconnected', () =>{
+      alert("disconnected")
+      this.closeCall();
     })
   }
 
@@ -113,6 +120,8 @@ export class VideoCallComponent implements OnInit {
             this.streamVideo(remoteStream, false);
 
             this.connection = call.peerConnection;
+            this.connection?.addEventListener('connectionstatechange', () => alert("state change: " + this.connection?.connectionState))
+            this.connection.oniceconnectionstatechange = (state) =>{alert(JSON.stringify(state))}
             this.peerList.push(call.peer);
           }
         })
@@ -125,6 +134,26 @@ export class VideoCallComponent implements OnInit {
     }
   }
 
+  closeCall(){
+    this.lazyStream!.getTracks().forEach(track => track.stop())
+    this.lazyStream = undefined;
+    this.peerList = [];
+    this.peerToCall = "";
+    this.connection?.close()
+    
+    let remoteCamContainer = document.getElementById("remote-video");
+    let localCamContainer = document.getElementById("local-video");
+    
+    remoteCamContainer?.childNodes.forEach(node =>{
+      node.remove();
+    })
+
+    localCamContainer?.childNodes.forEach(node =>{
+      node.remove();
+    })
+    localCamContainer!.style.display = "none"
+  }
+
   streamVideo(stream: MediaStream, isLocal: boolean) {
     let id = "remote-video";
     const video = document.createElement("video");
@@ -134,6 +163,7 @@ export class VideoCallComponent implements OnInit {
     if(isLocal){
       id = "local-video";
       video.muted = true;
+      document.getElementById(id)!.style.display = "unset"
     }
 
     video.play();
